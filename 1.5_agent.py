@@ -47,7 +47,7 @@ def configure_retriever(uploaded_files):
     splits = text_splitter.split_documents(docs)
 
     # 使用BaichuanTextEmbeddings向量模型生成文档的向量表示
-    key = "sk-0beba4b051ebc353716c6cf33440bc0a"
+    key = st.secrets["BAICHUAN_API_KEY"]
     embeddings = BaichuanTextEmbeddings(api_key=key)
     vectordb = Chroma.from_documents(splits, embeddings)
 
@@ -135,7 +135,7 @@ base_prompt = PromptTemplate.from_template(base_prompt_template) # from_template
 prompt = base_prompt.partial(instructions=instructions)
 
 # 创建llm
-API_KEY = "sk-eec86a167d424495a082d69a25ee3637"
+API_KEY = st.secrets["DEEPSEEK_API_KEY"]
 llm = ChatOpenAI(model="deepseek-reasoner",
                    openai_api_key=API_KEY,
                    openai_api_base="https://api.deepseek.com",

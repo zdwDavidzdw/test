@@ -1,0 +1,1 @@
+\# RAG Agent 智能问答 Streamlit 项目 ## 项目介绍 基于 LangChain + Streamlit 实现的文档检索问答Agent，支持多轮对话、文档检索、大模型调用。 ## 环境要求 - Python 3.10+ - Anaconda（推荐） ## 运行步骤 1.  激活conda环境：    ```bash    conda activate langchain

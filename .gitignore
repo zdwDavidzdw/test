@@ -1,0 +1,26 @@
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境
+env/
+venv/
+langchain/
+Anaconda3/
+
+# Streamlit 临时文件/数据库
+*.db
+*.log
+streamlit/
+
+# 临时文件
+temp/
+.tmp/
+.DS_Store
+
+# IDE 配置
+.idea/
+.vscode/
+*.swp

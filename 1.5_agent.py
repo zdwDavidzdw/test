@@ -71,14 +71,24 @@ memory = ConversationBufferMemory(
     chat_memory=msgs, return_messages=True, memory_key="chat_history", output_key="output"
 )
 
-# 指令模板
+# # 指令模板
+# instructions = """你是一个设计用于查询文档来回答问题的代理对象。
+# 你可以使用文档检索工具，并基于检索内容来回答问题
+# 你可能不查询文档就知道答案，但是你仍然应该查询文档来获得答案。
+# 如果你从文档中找不到任何信息用于回答问题，则只需返回“抱歉，这个问题我还不知道。”作为答案。
+# """
+
+# 指令模板【修改1：强化格式约束+强制输出格式】
 instructions = """你是一个设计用于查询文档来回答问题的代理对象。
-你可以使用文档检索工具，并基于检索内容来回答问题
-你可能不查询文档就知道答案，但是你仍然应该查询文档来获得答案。
+你必须严格使用文档检索工具，基于检索到的内容回答问题，绝对不能直接回答。
+回答必须严格遵循以下格式：
+1. 开头说明：根据检索到的文档信息，关于「用户问题」的解答如下：
+2. 分点清晰列出症状、药方等内容
+3. 最后必须加上：温馨提示：以上信息仅供参考。中医诊疗强调辨证论治，个人体质与病情不同，用药前请务必咨询专业中医师。
 如果你从文档中找不到任何信息用于回答问题，则只需返回“抱歉，这个问题我还不知道。”作为答案。
 """
 
-# 基础提示模板-React提示词
+# 基础提示模板-React提示词【修改2：强约束格式，强制模型走Action步骤】
 base_prompt_template = """
 {instructions}
 
@@ -89,10 +99,12 @@ You have access to the following tools:
 
 {tools}
 
+你必须严格遵守以下格式，**绝对不能跳过任何步骤**，否则会报错：
 To use a tool, please use the following format:
 
 ```
 Thought: Do I need to use a tool? Yes
+Action: 文档检索
 Action: the action to take, should be one of [{tool_names}]
 Action Input: {input}
 Observation: the result of the action
@@ -131,7 +143,7 @@ llm = ChatOpenAI(model="deepseek-reasoner",
 agent = create_react_agent(llm, tools, prompt)
 
 # 创建Agent执行器
-agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, handle_parsing_errors=True,max_iterations=5)
+agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, handle_parsing_errors=True, handle_parsing_errors="请严格按照要求的格式输出，必须包含Thought和Action步骤",max_iterations=5)
 
 # 创建聊天输入框
 user_query = st.chat_input(placeholder="请开始提问吧!")

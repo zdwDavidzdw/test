@@ -143,7 +143,7 @@ llm = ChatOpenAI(model="deepseek-reasoner",
 agent = create_react_agent(llm, tools, prompt)
 
 # 创建Agent执行器
-agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, handle_parsing_errors=True, handle_parsing_errors="请严格按照要求的格式输出，必须包含Thought和Action步骤",max_iterations=5)
+agent_executor = AgentExecutor(agent=agent, tools=tools, memory=memory, verbose=True, handle_parsing_errors="请严格按照要求的格式输出，必须包含Thought和Action步骤",max_iterations=5)
 
 # 创建聊天输入框
 user_query = st.chat_input(placeholder="请开始提问吧!")

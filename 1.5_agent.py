@@ -3,8 +3,6 @@ import streamlit as st
 st.set_option('server.enableCORS', False)
 st.set_option('server.enableXsrfProtection', False)
 
-# 后面原有代码不变...
-import streamlit as st
 import tempfile
 import os
 #适配 langchain 0.3.2 新路径

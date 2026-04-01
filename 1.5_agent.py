@@ -1,5 +1,5 @@
 import streamlit as st
-import tempfile #创建临时文件和目录，并提供了自动清理这些临时文件和目录的机制，以避免占用不必要的磁盘空间
+import tempfile
 import os
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
@@ -14,62 +14,49 @@ from langchain_openai import ChatOpenAI
 from langchain_community.embeddings import BaichuanTextEmbeddings
 
 
-# 设置Streamlit应⽤的⻚⾯标题和布局
 st.set_page_config(page_title="Rag Agent", layout="wide")
-
-# 设置应⽤的标题
 st.title("Rag Agent")
 
-#上传txt⽂件，允许上传多个⽂件
 uploaded_files = st.sidebar.file_uploader(
     label="上传txt⽂件", type=["txt"], accept_multiple_files=True
 )
-# 如果没有上传⽂件，提示⽤户上传⽂件并停⽌运⾏
+
 if not uploaded_files:
     st.info("请先上传按TXT⽂档。")
     st.stop()
-    
-#实现检索器函数封装：文件读取、分块、向量转换、向量数据库、MMR信息检索
+
 @st.cache_resource(ttl="1h")
 def configure_retriever(uploaded_files):
-    docs = [] #存储用户上传文件的文件内容（字符串）
-    #创建临时文件和目录
-    temp_dir = tempfile.TemporaryDirectory(dir=r"D:\\")
+    docs = []
+    # ⭐ 只改这一行！去掉 dir=r"D:\\"，云环境才能跑
+    temp_dir = tempfile.TemporaryDirectory()
+
     for file in uploaded_files:
         temp_filepath = os.path.join(temp_dir.name, file.name)
         with open(temp_filepath, "wb") as f:
-            f.write(file.getvalue()) #  file.getvalue() Streamlit 文件上传组件返回的对象,直接获取文件的字节流数据（无需读取文件句柄）
-        # 使用TextLoader加载文本文件
-        loader = TextLoader(temp_filepath, encoding="utf-8") # D:\\加文件，已经保存过了，有数据
-        docs.extend(loader.load())  # 读取文件 → 解析内容 → 生成文档对象列表。
-    # 进行文档分割
+            f.write(file.getvalue())
+
+        loader = TextLoader(temp_filepath, encoding="utf-8")
+        docs.extend(loader.load())
+
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=300, chunk_overlap=50)
     splits = text_splitter.split_documents(docs)
 
-    # 使用BaichuanTextEmbeddings向量模型生成文档的向量表示
-    key = st.secrets["BAICHUAN_API_KEY"]
-    embeddings = BaichuanTextEmbeddings(api_key=key)
+    # ⭐ 完全保留你的百川 Embedding，不动
+    embeddings = BaichuanTextEmbeddings(api_key=st.secrets["BAICHUAN_API_KEY"])
     vectordb = Chroma.from_documents(splits, embeddings)
 
-    # 创建文档检索器
     retriever = vectordb.as_retriever()
-    #返回检索器对象
     return retriever
 
-# 配置检索器：调用检索器函数，返回MMR检索器对象
 retriever = configure_retriever(uploaded_files)
 
-# 如果session_state中没有消息记录或用户点击了清空聊天记录按钮，则初始化消息记录
 if "messages" not in st.session_state or st.sidebar.button("清空聊天记录"):
     st.session_state["messages"] = [{"role": "assistant", "content": "您好，我是AI智能助手，我可以查询文档"}]
 
-# 加载历史聊天记录
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
 
-    
-# 下一步工作就是将文档检索作用在Agent对象中。创建Agent时需要让其对多轮对话具备上下文记忆能力
-# 创建用于文档检索的工具
 from langchain.tools.retriever import create_retriever_tool
 tool = create_retriever_tool(
     retriever = retriever,
@@ -78,9 +65,7 @@ tool = create_retriever_tool(
 )
 tools = [tool]
 
-# 创建聊天消息历史记录
 msgs = StreamlitChatMessageHistory()
-# 创建对话缓冲区
 memory = ConversationBufferMemory(
     chat_memory=msgs, return_messages=True, memory_key="chat_history", output_key="output"
 )

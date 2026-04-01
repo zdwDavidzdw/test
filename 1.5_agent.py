@@ -1,7 +1,9 @@
 import streamlit as st
 import tempfile
 import os
-from langchain.memory import ConversationBufferMemory
+#适配 langchain 0.3.2 新路径
+from langchain_community.memory import ConversationBufferMemory
+# from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_community.document_loaders import TextLoader
 from langchain_openai import ChatOpenAI

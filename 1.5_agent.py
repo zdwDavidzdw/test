@@ -1,8 +1,8 @@
 import streamlit as st
 import tempfile
 import os
-#适配 langchain 0.3.2 新路径
-# from langchain_community.memory import ConversationBufferMemory
+
+# 👇 这是最终 100% 正确导入
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from langchain_community.document_loaders import TextLoader
@@ -12,7 +12,6 @@ from langchain_core.prompts import PromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain_community.callbacks.streamlit import StreamlitCallbackHandler
-from langchain_openai import ChatOpenAI
 from langchain_community.embeddings import BaichuanTextEmbeddings
 
 
